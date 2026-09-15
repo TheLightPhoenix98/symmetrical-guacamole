@@ -1,0 +1,32 @@
+name: Download Soundless 1080p Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'YouTube Video URL'
+        required: true
+        type: string
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install yt-dlp
+        run: |
+          sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          sudo chmod a+rx /usr/local/bin/yt-dlp
+
+      - name: Download 1080p Video Only (No Audio)
+        run: |
+          yt-dlp -f "bestvideo[height<=1080]" "${{ github.event.inputs.video_url }}" -o "video.%(ext)s"
+
+      - name: Upload Video as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: soundless-1080p-video
+          path: video.*
