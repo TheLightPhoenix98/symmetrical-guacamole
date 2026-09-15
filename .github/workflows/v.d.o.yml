@@ -16,6 +16,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install Deno (JS Runtime for yt-dlp)
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
       - name: Install yt-dlp
         run: |
           sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
@@ -23,7 +28,11 @@ jobs:
 
       - name: Download 1080p Video Only (No Audio)
         run: |
-          yt-dlp -f "bestvideo[height<=1080]" "${{ github.event.inputs.video_url }}" -o "video.%(ext)s"
+          yt-dlp \
+            --extractor-args "youtube:player_client=android,web" \
+            -f "bestvideo[height<=1080]" \
+            "${{ github.event.inputs.video_url }}" \
+            -o "video.%(ext)s"
 
       - name: Upload Video as Artifact
         uses: actions/upload-artifact@v4
